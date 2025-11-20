@@ -1,5 +1,5 @@
 import tkinter as tk
-from gestion import Principal
+from manejador import Principal
 
 
 if __name__ == "__main__":

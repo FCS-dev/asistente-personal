@@ -1,6 +1,9 @@
 import sqlite3, os, bcrypt
 import tkinter as tk
 from tkinter import messagebox as msj
+import tareas as task
+import notas as note
+import eventos as event
 
 
 class Principal:
@@ -29,31 +32,13 @@ class Principal:
         btn_nuevo_nota.pack(pady=5)
         btn_nuevo_evento.pack(pady=5)
 
-        # labels nota
-        nota_descrip_label = tk.Label(root, text="Nota")
-        nota_fecha_label = tk.Label(root, text="Fecha")
-        nota_tags_label = tk.Label(root, text="Tags")
+        left_frame = tk.Frame(root)
+        left_frame.pack(side=tk.LEFT, padx=10, pady=10, fill=tk.Y)
 
-        # labels evento
-        evento_descrip_label = tk.Label(root, text="Evento")
-        evento_fecha_inicio_label = tk.Label(root, text="Fecha inicio")
-        evento_fecha_fin_label = tk.Label(root, text="Fecha final")
-        evento_tags_label = tk.Label(root, text="Tags")
-
-        # entrys nota
-        nota_descrip_entry = tk.Entry(root, width=40)
-        nota_fecha_entry = tk.Entry(root, width=10)
-        nota_tags_entry = tk.Entry(root, width=40)
-
-        # entrys evento
-        evento_descrip_entry = tk.Entry(root, width=40)
-        evento_fecha_inicio_entry = tk.Entry(root, width=10)
-        evento_fecha_fin_entry = tk.Entry(root, width=10)
-        evento_tags_entry = tk.Entry(root, width=40)
-
-        # left_frame = tk.Frame(root)
-        # left_frame.pack(side=tk.LEFT, padx=10, pady=10, fill=tk.Y)
-
+        btn_cualquiera = tk.Button(
+            left_frame, text="xxx", command=self.nueva_tarea, width=20
+        )
+        btn_cualquiera.pack(pady=5)
         # # Frame derecho con Listbox para mostrar contactos
         # right_frame = tk.Frame(root)
         # right_frame.pack(side=tk.RIGHT, padx=10, pady=10, fill=tk.BOTH, expand=True)
@@ -85,7 +70,8 @@ class Principal:
                 tipo TEXT NOT NULL DEFAULT 'USER',
                 fecha_creacion TEXT DEFAULT (DATE('now','localtime'))
             )""")
-        # 'tipo' por defecto 'USER'. Valores posibles 'USER', 'ADMIN'
+        # 'tipo' por defecto 'USER'.
+        #  Valores posibles: 'USER', 'ADMIN'
         self.cursor.execute("SELECT COUNT(*) FROM usuarios")
         cantidad_usuarios = self.cursor.fetchone()[0]
         if cantidad_usuarios == 0:
@@ -101,7 +87,7 @@ class Principal:
                 tarea_descrip TEXT NOT NULL,
                 fecha TEXT,          
                 prioridad TEXT,      
-                estado TEXT,         
+                estado TEXT DEFAULT 'pendiente',         
                 tags TEXT   
             )""")
         # fecha TEXT,          -- YYYY-MM-DD
@@ -127,27 +113,44 @@ class Principal:
         self.conn.commit()
 
     def nueva_tarea(self):
-        # labels tarea
-        tarea_descrip_label = tk.Label(self.root, text="Tarea").pack()
-        tarea_fecha_label = tk.Label(self.root, text="Fecha").pack()
-        tarea_prioridad_label = tk.Label(self.root, text="Prioridad").pack()
-        tarea_tags_label = tk.Label(self.root, text="Tags").pack()
-
-        # entrys tarea
-        tarea_descrip_entry = tk.Entry(self.root, width=40)
-        tarea_fecha_entry = tk.Entry(self.root, width=10)
-        tarea_prioridad_entry = tk.Entry(self.root, width=10)
-        tarea_tags_entry = tk.Entry(self.root, width=40)
-        tarea_descrip_entry.pack(pady=5)
-        tarea_fecha_entry.pack(pady=5)
-        tarea_prioridad_entry.pack(pady=5)
-        tarea_tags_entry.pack(pady=5)
+        dialog = task.VentanaTarea(self.root)
+        if dialog.result:  # si el usuario pulsa aceptar
+            self.cursor.execute(
+                "INSERT INTO tareas (tarea_descrip,fecha, prioridad,tags) VALUES (?, ?, ?,?)",
+                (
+                    dialog.result["tarea"],
+                    dialog.result["fecha"],
+                    dialog.result["prioridad"],
+                    dialog.result["tags"],
+                ),
+            )
+            self.conn.commit()
 
     def nueva_nota(self):
-        msj.showinfo("Temporal", "Nueva NOTA")
+        dialog = note.VentanaTarea(self.root)
+        if dialog.result:
+            self.cursor.execute(
+                "INSERT INTO notas (nota_descrip,tags) VALUES (?, ?)",
+                (
+                    dialog.result["nota"],
+                    dialog.result["tags"],
+                ),
+            )
+            self.conn.commit()
 
     def nuevo_evento(self):
-        msj.showinfo("Temporal", "Nuevo EVENTO")
+        dialog = event.VentanaTarea(self.root)
+        if dialog.result:
+            self.cursor.execute(
+                "INSERT INTO eventos (evento_descrip,fecha_inicio,fecha_fin,tags) VALUES (?, ?, ?, ?)",
+                (
+                    dialog.result["evento"],
+                    dialog.result["fecini"],
+                    dialog.result["fecfin"],
+                    dialog.result["tags"],
+                ),
+            )
+            self.conn.commit()
 
     # -------------------------------
     # Cargar contactos desde DB
