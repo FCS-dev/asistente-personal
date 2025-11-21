@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import simpledialog, messagebox
+from tkinter import simpledialog
+import tkinter.messagebox as msj
 import utiles as util
 
 
@@ -16,7 +17,8 @@ class VentanaTarea(simpledialog.Dialog):
     def body(self, master):
         # labels tarea
         tk.Label(master, text="Tarea").grid(row=0, column=0, sticky="e")
-        tk.Label(master, text="Fecha (dd/mm/yyyy)").grid(row=1, column=0, sticky="e")
+        tk.Label(master, text="Fecha").grid(row=1, column=0, sticky="e")
+        tk.Label(master, text="(dd/mm/yyyy)").grid(row=1, column=2, sticky="w")
         tk.Label(master, text="Prioridad").grid(row=2, column=0, sticky="e")
         tk.Label(master, text="Tags").grid(row=4, column=0, sticky="e")
 
@@ -28,9 +30,9 @@ class VentanaTarea(simpledialog.Dialog):
         self.tarea_fecha_entry = tk.Entry(master, width=10)
         self.tarea_tags_entry = tk.Entry(master, width=40)
 
-        self.tarea_descrip_entry.grid(row=0, column=1, sticky="w")
+        self.tarea_descrip_entry.grid(row=0, column=1, columnspan=2, sticky="w")
         self.tarea_fecha_entry.grid(row=1, column=1, sticky="w")
-        self.tarea_tags_entry.grid(row=4, column=1, sticky="w")
+        self.tarea_tags_entry.grid(row=4, column=1, columnspan=2, sticky="w")
 
         # -----------------------------
         # Prioridad: Radiobuttons
@@ -90,9 +92,7 @@ class VentanaTarea(simpledialog.Dialog):
         prioridad = self.tarea_prioridad_entry.get().strip()
         tags = self.tarea_tags_entry.get().strip()
         if not tarea or not util.valida_fecha(fecha) or not prioridad or not tags:
-            messagebox.showwarning(
-                "Verificar información", "Debe introducir datos válidos."
-            )
+            msj.showwarning("Verificar información", "Debe introducir datos válidos.")
             return False
         return True
 

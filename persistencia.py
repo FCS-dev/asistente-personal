@@ -36,12 +36,12 @@ class Persistencia:
                     tarea_descrip TEXT NOT NULL,
                     fecha TEXT,          
                     prioridad TEXT DEFAULT 'Normal',      
-                    estado TEXT DEFAULT 'pendiente',         
+                    estado TEXT DEFAULT 'Pendiente',         
                     tags TEXT   
                 )""")
         # fecha TEXT,          -- YYYY-MM-DD
         # prioridad TEXT,      -- 'Normal' y 'Alta'
-        # estado TEXT,         -- 'pendiente', 'en_progreso', 'completada'
+        # estado TEXT,         -- 'Pendiente', 'En progreso', 'Completada','Archivada'
         self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS notas (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -65,6 +65,11 @@ class Persistencia:
         self.cursor.execute("SELECT * FROM tareas ORDER BY fecha DESC")
         tareas = self.cursor.fetchall()
         return tareas
+
+    def trae_una_tarea(self, id):
+        self.cursor.execute("SELECT * FROM tareas WHERE id=?", (id,))
+        tarea = self.cursor.fetchone()
+        return tarea
 
     def guarda_nueva_tarea(self, tarea, fecha, prioridad, tags):
         self.cursor.execute(
