@@ -26,6 +26,12 @@ class Handler:
         btn_nuevo_tarea = tk.Button(
             root, text="Nueva Tarea", command=self.nueva_tarea, width=20
         )
+        btn_cambiar_estado_tarea = tk.Button(
+            root, text="Cambiar Estado", command=self.cambiar_estado, width=20
+        )
+        btn_eliminar_tarea = tk.Button(
+            root, text="Eliminar Tarea", command=self.eliminar_tarea, width=20
+        )
         btn_nuevo_nota = tk.Button(
             root, text="Nueva Nota", command=self.nueva_nota, width=20
         )
@@ -33,6 +39,8 @@ class Handler:
             root, text="Nuevo Evento", command=self.nuevo_evento, width=20
         )
         btn_nuevo_tarea.pack(pady=10, padx=10)
+        btn_cambiar_estado_tarea.pack(pady=10, padx=10)
+        btn_eliminar_tarea.pack(pady=10, padx=10)
         btn_nuevo_nota.pack(pady=10, padx=10)
         btn_nuevo_evento.pack(pady=10, padx=10)
 
@@ -73,6 +81,12 @@ class Handler:
             self.bd.guarda_nueva_tarea(tarea, fecha, prioridad, tags)
             self.carga_tareas_pendientes()
 
+    def cambiar_estado(self):
+        pass
+
+    def eliminar_tarea(self):
+        msj.show
+
     def nueva_nota(self):
         dialog = note.VentanaTarea(self.root)
         if dialog.result:
@@ -102,6 +116,7 @@ class Handler:
             self.root,
             title="Editar Tarea",
             initial_data={
+                "id": fila[0],
                 "descrip": fila[1],
                 "fecha": util.bd_a_fecha(fila[2]),
                 "prioridad": fila[3],
