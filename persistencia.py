@@ -10,7 +10,7 @@ class Persistencia:
         self.conn = sqlite3.connect(DB)
         self.cursor = self.conn.cursor()
 
-    def creando_tablas(self):
+    def crea_tablas(self):
         self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS usuarios (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -1,6 +1,6 @@
-import sqlite3, os, bcrypt
 import tkinter as tk
 from tkinter import messagebox as msj
+import persistencia as persist
 import tareas as task
 import notas as note
 import eventos as event
@@ -11,12 +11,15 @@ class Handler:
         self.root = root
         self.root.title("Asistente Personal")
         ########
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-        DB = os.path.join(BASE_DIR, "passistant.db")
+        bd = persist.Persistencia()
+        bd.crea_tablas()
+        # BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        # DB = os.path.join(BASE_DIR, "passistant.db")
 
-        self.conn = sqlite3.connect(DB)
-        self.cursor = self.conn.cursor()
-        self.create_tables()
+        # self.conn = sqlite3.connect(DB)
+        # self.cursor = self.conn.cursor()
+        # self.create_tables()
+
         ########
         # Frame izq c/Listbox para mostrar pdtes
         left_frame = tk.Frame(root)
