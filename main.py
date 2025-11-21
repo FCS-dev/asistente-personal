@@ -1,8 +1,8 @@
 import tkinter as tk
-from manejador import Principal
+import handler as principal
 
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = Principal(root)
+    app = principal.Handler(root)
     root.mainloop()
