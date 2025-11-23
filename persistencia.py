@@ -11,6 +11,7 @@ class Persistencia:
         self.cursor = self.conn.cursor()
 
     def crea_tablas(self):
+        # tipo: 'USER' (por defecto), 'ADMIN'
         self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS usuarios (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -19,8 +20,6 @@ class Persistencia:
                     tipo TEXT NOT NULL DEFAULT 'USER',
                     fecha_creacion TEXT DEFAULT (DATE('now','localtime'))
                 )""")
-        # 'tipo' por defecto 'USER'.
-        #  Valores posibles: 'USER', 'ADMIN'
         self.cursor.execute("SELECT COUNT(*) FROM usuarios")
         cantidad_usuarios = self.cursor.fetchone()[0]
         if cantidad_usuarios == 0:
@@ -30,6 +29,8 @@ class Persistencia:
                 "INSERT INTO usuarios (usuario,password_hash,tipo) VALUES (?,?,?)",
                 ("Administrador", hashed, "ADMIN"),
             )
+        # prioridad: 'Normal', 'Alta'
+        # estado: 'Pendiente', 'En progreso', 'Completada', 'Archivada'
         self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS tareas (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,9 +40,6 @@ class Persistencia:
                     estado TEXT DEFAULT 'Pendiente',         
                     tags TEXT   
                 )""")
-        # fecha TEXT,          -- YYYY-MM-DD
-        # prioridad TEXT,      -- 'Normal' y 'Alta'
-        # estado TEXT,         -- 'Pendiente', 'En progreso', 'Completada','Archivada'
         self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS notas (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,18 +47,18 @@ class Persistencia:
                     fecha_creacion TEXT DEFAULT (DATE('now','localtime')),
                     tags TEXT
                 )""")
+        # fecha_fin: si no se especifica, debe ser la misma que fecha_inicio
         self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS eventos (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                     evento_descrip TEXT NOT NULL,
                     fecha_inicio TEXT NOT NULL,    
                     fecha_fin TEXT,                
                     tags TEXT
                 )""")
-        # fecha_inicio TEXT NOT NULL,     -- YYYY-MM-DD
-        # fecha_fin TEXT,                 -- si no hay, usar misma fecha_inicio
         self.conn.commit()
 
+    # Tareas
     def trae_tareas(self):
         self.cursor.execute("SELECT * FROM tareas ORDER BY fecha DESC")
         tareas = self.cursor.fetchall()
@@ -91,6 +89,31 @@ class Persistencia:
         )
         self.conn.commit()
 
+    def cambiar_estado_tarea(self, id_tarea, nuevo_estado):
+        self.cursor.execute(
+            "UPDATE tareas SET estado=? WHERE id=?",
+            (
+                nuevo_estado,
+                id_tarea,
+            ),
+        )
+        self.conn.commit()
+
+    def eliminar_tarea(self, id):
+        self.cursor.execute("DELETE FROM tareas WHERE id=?", (id,))
+        self.conn.commit()
+
+    # Notas
+    def trae_notas(self):
+        self.cursor.execute("SELECT * FROM notas ORDER BY fecha_creacion DESC")
+        notas = self.cursor.fetchall()
+        return notas
+
+    def trae_una_nota(self, id):
+        self.cursor.execute("SELECT * FROM notas WHERE id=?", (id,))
+        nota = self.cursor.fetchone()
+        return nota
+
     def guardar_nueva_nota(self, nota, tags):
         self.cursor.execute(
             "INSERT INTO notas (nota_descrip,tags) VALUES (?, ?)",
@@ -101,9 +124,37 @@ class Persistencia:
         )
         self.conn.commit()
 
-    def guardar_nuevo_evento(self, evento, fecini, fecfin, tags):
+    def guardar_nota(self, id_nota, descrip, tags):
         self.cursor.execute(
-            "INSERT INTO eventos (evento_descrip,fecha_inicio,fecha_fin,tags) VALUES (?, ?, ?, ?)",
+            "UPDATE notas SET nota_descrip=?, tags=? WHERE id=?",
+            (
+                descrip,
+                tags,
+                id_nota,
+            ),
+        )
+        self.conn.commit()
+
+    def eliminar_nota(self, id):
+        self.cursor.execute("DELETE FROM notas WHERE id=?", (id,))
+        self.conn.commit()
+
+    # Eventos
+    def trae_eventos(self):
+        self.cursor.execute("SELECT * FROM eventos ORDER BY fecha_inicio DESC")
+        eventos = self.cursor.fetchall()
+        return eventos
+
+    def trae_un_evento(self, id):
+        self.cursor.execute("SELECT * FROM eventos WHERE id=?", (id,))
+        evento = self.cursor.fetchone()
+        return evento
+
+    def guardar_nuevo_evento(self, evento, fecini, fecfin, tags):
+        if not fecfin:
+            fecfin = fecini
+        self.cursor.execute(
+            "INSERT INTO eventos (evento_descrip, fecha_inicio, fecha_fin, tags) VALUES (?, ?, ?, ?)",
             (
                 evento,
                 fecini,
@@ -113,5 +164,25 @@ class Persistencia:
         )
         self.conn.commit()
 
+    def guardar_evento(self, id_evento, descrip, fecini, fecfin, tags):
+        if not fecfin:
+            fecfin = fecini
+        self.cursor.execute(
+            "UPDATE eventos SET evento_descrip=?, fecha_inicio=?, fecha_fin=?, tags=? WHERE id=?",
+            (
+                descrip,
+                fecini,
+                fecfin,
+                tags,
+                id_evento,
+            ),
+        )
+        self.conn.commit()
+
+    def eliminar_evento(self, id):
+        self.cursor.execute("DELETE FROM eventos WHERE id=?", (id,))
+        self.conn.commit()
+
+    # Cerrando la conexion
     def cerrar_conexion(self):
         self.conn.close()

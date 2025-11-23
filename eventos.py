@@ -1,8 +1,9 @@
 import tkinter as tk
 from tkinter import simpledialog, messagebox
+import utiles as util
 
 
-class VentanaTarea(simpledialog.Dialog):
+class VentanaEvento(simpledialog.Dialog):
     def __init__(self, parent, title="Eventos", initial_data=None):
         self.initial_data = initial_data or {
             "descrip": "",
@@ -14,7 +15,7 @@ class VentanaTarea(simpledialog.Dialog):
 
     def body(self, master):
         # labels evento
-        evento_descrip_label = tk.Label(master, text="Tarea").grid(
+        evento_descrip_label = tk.Label(master, text="Nombre Evento").grid(
             row=0, column=0, sticky="e"
         )
         evento_fecha_inicio_label = tk.Label(master, text="Fecha inicio").grid(
@@ -52,12 +53,18 @@ class VentanaTarea(simpledialog.Dialog):
 
     def validate(self):
         # Validar campos no vacíos
+        fecfin = self.evento_fecha_fin_entry.get().strip()
         evento = self.evento_descrip_entry.get().strip()
         fecini = self.evento_fecha_inicio_entry.get().strip()
-        fecfin = self.evento_fecha_fin_entry.get().strip()
+        if not fecfin:
+            fecfin = self.evento_fecha_inicio_entry.get()
         tags = self.evento_tags_entry.get().strip()
-
-        if not evento or not fecini or not fecfin or not tags:
+        if (
+            not evento
+            or not util.valida_fecha(fecini)
+            or not util.valida_fecha(fecfin)
+            or not tags
+        ):
             messagebox.showwarning(
                 "Campos vacíos", "Todos los campos son obligatorios."
             )
@@ -66,9 +73,12 @@ class VentanaTarea(simpledialog.Dialog):
 
     def apply(self):
         # Guardar datos en resultado
+        fecfin = self.evento_fecha_fin_entry.get().strip()
+        if not fecfin:
+            fecfin = self.evento_fecha_inicio_entry.get().strip()
         self.result = {
             "evento": self.evento_descrip_entry.get().strip(),
-            "fecini": self.evento_fecha_inicio_entry.get().strip(),
-            "fecfin": self.evento_fecha_fin_entry.get().strip(),
+            "fecini": util.fecha_a_bd(self.evento_fecha_inicio_entry.get().strip()),
+            "fecfin": util.fecha_a_bd(fecfin),
             "tags": self.evento_tags_entry.get().strip(),
         }

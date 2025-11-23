@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import simpledialog, messagebox
 
 
-class VentanaTarea(simpledialog.Dialog):
+class VentanaNota(simpledialog.Dialog):
     def __init__(self, parent, title="Notas", initial_data=None):
         self.initial_data = initial_data or {
             "descrip": "",
