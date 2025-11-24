@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import simpledialog
 import tkinter.messagebox as msj
 import utiles as util
+import persistencia as bd
 
 
 class VentanaTarea(simpledialog.Dialog):
@@ -20,30 +21,40 @@ class VentanaTarea(simpledialog.Dialog):
         tk.Label(master, text="Fecha").grid(row=1, column=0, sticky="e")
         tk.Label(master, text="(dd/mm/yyyy)").grid(row=1, column=2, sticky="w")
         tk.Label(master, text="Prioridad").grid(row=2, column=0, sticky="e")
-        tk.Label(master, text="Tags").grid(row=4, column=0, sticky="e")
-
         # entrys tarea
         self.tarea_descrip_entry = tk.Entry(
             master,
             width=40,
         )
+
         self.tarea_fecha_entry = tk.Entry(master, width=10)
-        self.tarea_tags_entry = tk.Entry(master, width=40)
+        # los tags ahora se seleccionan mediante un diálogo (VentanaTags)
+        self.tarea_tags_entry = None
 
         self.tarea_descrip_entry.grid(row=0, column=1, columnspan=2, sticky="w")
         self.tarea_fecha_entry.grid(row=1, column=1, sticky="w")
-        self.tarea_tags_entry.grid(row=4, column=1, columnspan=2, sticky="w")
 
-        # -----------------------------
+        btn_tags = tk.Button(
+            master, text="Definir Tags", command=self.mostrar_tags, width=20
+        )
+        btn_tags.grid(row=4, column=1, sticky="w")
+        self.tags_preview_label = tk.Label(
+            master,
+            text="Seleccionados: " + (self.initial_data.get("tag") or "(ninguno)"),
+            wraplength=300,
+            justify="left",
+        )
+        self.tags_preview_label.grid(row=5, column=1, sticky="w")
+        # atributo que guarda la cadena de tags seleccionados (coma-separada)
+        self.tags_seleccionados = self.initial_data.get("tag") or ""
+
         # Prioridad: Radiobuttons
-        # -----------------------------
         valor_inicial = self.initial_data.get("prioridad")
         if valor_inicial not in ("Normal", "Alta"):
             valor_inicial = "Normal"
 
         self.prioridad_var = tk.StringVar(value=valor_inicial)
 
-        # Radiobutton Normal
         rb_normal = tk.Radiobutton(
             master,
             text="Normal",
@@ -53,8 +64,6 @@ class VentanaTarea(simpledialog.Dialog):
             state="normal",
         )
         rb_normal.grid(row=2, column=1, sticky="w")
-
-        # Radiobutton Alta
         rb_alta = tk.Radiobutton(
             master,
             text="Alta",
@@ -67,13 +76,13 @@ class VentanaTarea(simpledialog.Dialog):
 
         # Entry interno para aplicar y validar
         self.tarea_prioridad_entry = tk.Entry(master, width=10)
+
         self._actualizar_prioridad_entry()
 
         # Rellenar si vienen datos iniciales (para editar)
         self.tarea_descrip_entry.insert(0, self.initial_data["descrip"])
         self.tarea_fecha_entry.insert(0, self.initial_data["fecha"])
         self.tarea_prioridad_entry.insert(0, self.initial_data["prioridad"])
-        self.tarea_tags_entry.insert(0, self.initial_data["tag"])
 
         # El campo de nombre recibe el foco al abrir el diálogo
         return self.tarea_descrip_entry
@@ -86,13 +95,19 @@ class VentanaTarea(simpledialog.Dialog):
         self.tarea_prioridad_entry.config(state="readonly")
 
     def validate(self):
-        # Validar campos no vacíos
         tarea = self.tarea_descrip_entry.get().strip()
         fecha = self.tarea_fecha_entry.get().strip()
         prioridad = self.tarea_prioridad_entry.get().strip()
-        tags = self.tarea_tags_entry.get().strip()
-        if not tarea or not util.valida_fecha(fecha) or not prioridad or not tags:
-            msj.showwarning("Verificar información", "Debe introducir datos válidos.")
+        if not tarea:
+            msj.showwarning("Validación", "Debe ingresar una descripción para la tarea")
+            return False
+        if not util.valida_fecha(fecha):
+            msj.showwarning(
+                "Validación", "Debe ingresar una fecha válida (mínimo: 01/01/2020)"
+            )
+            return False
+        if not prioridad:
+            msj.showwarning("Validación", "Debe definir una prioridad para la tarea")
             return False
         return True
 
@@ -102,5 +117,20 @@ class VentanaTarea(simpledialog.Dialog):
             "tarea": self.tarea_descrip_entry.get().strip(),
             "fecha": util.fecha_a_bd(self.tarea_fecha_entry.get().strip()),
             "prioridad": self.tarea_prioridad_entry.get().strip(),
-            "tags": self.tarea_tags_entry.get().strip(),
+            "tags": getattr(self, "tags_seleccionados", ""),
         }
+
+    def mostrar_tags(self):
+        datos = bd.Persistencia()
+        filas = datos.todos_los_tags("Tareas")
+        lista_tags = [f[0] for f in filas]
+        inicial_tags = self.tags_seleccionados or self.initial_data.get("tag") or ""
+        dialog = util.VentanaTags(
+            parent=self.master, lista_tags=lista_tags, initial_tags=inicial_tags
+        )
+        if dialog.result is not None:
+            self.tags_seleccionados = dialog.result
+            texto = "Seleccionados: " + (
+                self.tags_seleccionados if self.tags_seleccionados else "(ninguno)"
+            )
+            self.tags_preview_label.config(text=texto)

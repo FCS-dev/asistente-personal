@@ -56,7 +56,55 @@ class Persistencia:
                     fecha_fin TEXT,                
                     tags TEXT
                 )""")
+        self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS tags (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    tipo TEXT NOT NULL,
+                    tag_descrip TEXT NOT NULL
+                )""")
         self.conn.commit()
+        self.cursor.execute("SELECT COUNT(*) FROM tags")
+        # Solo se crearan los tags si la bd fue recreada
+        if self.cursor.fetchone()[0] == 0:
+            tags_tareas = [
+                "Personal",
+                "Trabajo",
+                "Salud",
+                "Finanzas",
+                "Hogar",
+                "Estudios",
+                "Urgente",
+                "Ideas",
+                "Proyectos",
+            ]
+            tags_eventos = [
+                "Reunión",
+                "Cumpleaños",
+                "Cita médica",
+                "Viaje",
+                "Plazo administrativo",
+                "Recordatorio",
+            ]
+            tags_notas = [
+                "Idea",
+                "Apunte",
+                "Información general",
+                "Investigación",
+                "Enlace/Referencia",
+            ]
+            for i in tags_tareas:
+                self.cursor.execute(
+                    f"INSERT INTO tags (tipo,tag_descrip) VALUES ('Tareas','{i}')"
+                )
+            for i in tags_eventos:
+                self.cursor.execute(
+                    f"INSERT INTO tags (tipo,tag_descrip) VALUES ('Eventos','{i}')"
+                )
+            for i in tags_notas:
+                self.cursor.execute(
+                    f"INSERT INTO tags (tipo,tag_descrip) VALUES ('Notas','{i}')"
+                )
+            self.conn.commit()
 
     # Tareas
     def trae_tareas(self):
@@ -141,7 +189,7 @@ class Persistencia:
 
     # Eventos
     def trae_eventos(self):
-        self.cursor.execute("SELECT * FROM eventos ORDER BY fecha_inicio DESC")
+        self.cursor.execute("SELECT * FROM eventos ORDER BY fecha_fin DESC")
         eventos = self.cursor.fetchall()
         return eventos
 
@@ -182,6 +230,11 @@ class Persistencia:
     def eliminar_evento(self, id):
         self.cursor.execute("DELETE FROM eventos WHERE id=?", (id,))
         self.conn.commit()
+
+    # Tags
+    def todos_los_tags(self, tipo):
+        self.cursor.execute("SELECT tag_descrip FROM tags WHERE tipo=?", (tipo,))
+        return self.cursor.fetchall()
 
     # Cerrando la conexion
     def cerrar_conexion(self):
