@@ -236,6 +236,52 @@ class Persistencia:
         self.cursor.execute("SELECT tag_descrip FROM tags WHERE tipo=?", (tipo,))
         return self.cursor.fetchall()
 
+    def eliminar_data(self, adm, clave):
+        self.cursor.execute(
+            "SELECT * FROM usuarios WHERE usuario=? AND tipo='ADMIN'",
+            (adm,),
+        )
+        linea_adm = self.cursor.fetchone()
+        if not linea_adm:
+            return False
+        password = linea_adm[2]
+        if not bcrypt.checkpw(clave.encode("utf-8"), password):
+            return False
+        try:
+            self.cursor.execute("DELETE FROM tareas")
+            self.cursor.execute("DELETE FROM notas")
+            self.cursor.execute("DELETE FROM eventos")
+            self.conn.commit()
+        except Exception as e:
+            return False
+        return True
+
+    def cambiar_clave(self, adm, clave, nva_clave):
+        self.cursor.execute(
+            "SELECT * FROM usuarios WHERE usuario=? AND tipo='ADMIN'",
+            (adm,),
+        )
+        linea_adm = self.cursor.fetchone()
+        if not linea_adm:
+            return False
+        id_user = linea_adm[0]
+        password = linea_adm[2]
+        if not bcrypt.checkpw(clave.encode("utf-8"), password):
+            # print(f"Administrador: {adm}")
+            # print(f"Clave ANTERIOR: {clave}")
+            # print(f"Clave NUEVA: {nva_clave}")
+            return False
+        try:
+            hashed = bcrypt.hashpw(nva_clave.encode(), bcrypt.gensalt())
+            self.cursor.execute(
+                "UPDATE usuarios SET password_hash=? WHERE id=?",
+                (hashed, id_user),
+            )
+            self.conn.commit()
+        except Exception as e:
+            return False
+        return True
+
     # Cerrando la conexion
     def cerrar_conexion(self):
         self.conn.close()

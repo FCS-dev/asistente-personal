@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox as msj
+from tkinter import filedialog
 
 import persistencia as persist
 import utiles as util
@@ -21,7 +22,7 @@ class HandlerUI:
         )
         ##user_menu.add_separator()
         adm_menu = tk.Menu(menu_bar, tearoff=0)
-        adm_menu.add_command(label="Borrar BD", command=self.borrar_bd_adm)
+        adm_menu.add_command(label="Borrar info BD", command=self.borrar_info_bd_adm)
         adm_menu.add_command(label="Cambiar contraseña", command=self.cambiar_clave_adm)
 
         menu_bar.add_cascade(label="Usuario", menu=user_menu)
@@ -259,7 +260,12 @@ class HandlerUI:
             self.id_map_n[i + offset] = _id  # guardamos el ID
 
     def exportar_pdf_user(self):
-        if util.generar_pdf():
+        ruta_archivo = filedialog.asksaveasfilename(
+            defaultextension=".pdf", filetypes=[("Archivo PDF", "*.pdf")]
+        )
+        if not ruta_archivo:
+            return
+        if util.generar_pdf(ruta_archivo):
             msj.showinfo("Confirmación", "El archivo .PDF fue generado correctamente")
         else:
             msj.showwarning(
@@ -268,7 +274,12 @@ class HandlerUI:
             )
 
     def exportar_json_user(self):
-        if util.generar_json():
+        ruta_archivo = filedialog.asksaveasfilename(
+            defaultextension=".json", filetypes=[("Archivo de texto", "*.json")]
+        )
+        if not ruta_archivo:
+            return
+        if util.generar_json(ruta_archivo):
             msj.showinfo("Confirmación", "El archivo .JSON fue generado correctamente")
         else:
             msj.showwarning(
@@ -280,10 +291,27 @@ class HandlerUI:
         pass
 
     def cambiar_clave_adm(self):
-        pass
+        if util.actualizar_clave_adm(self.root, self.bd.cambiar_clave):
+            msj.showinfo("Aviso", "Se actualizó la clave del administrador con éxito")
+        else:
+            msj.showwarning(
+                "Aviso",
+                "No se pudo actualizar la clave del administrador, datos inválidos",
+            )
 
-    def borrar_bd_adm(self):
-        pass
+    def borrar_info_bd_adm(self):
+        if util.borrar_info(self.root, self.bd.eliminar_data):
+            msj.showinfo(
+                "Aviso", "Se ha eliminado toda la información registrada de la BD"
+            )
+        else:
+            msj.showwarning(
+                "Aviso",
+                "No se pudo eliminar la información de la BD, Contacte con el admnistrador",
+            )
+        self.carga_tareas()
+        self.carga_eventos()
+        self.carga_notas()
 
     def on_closing(self):
         self.bd.cerrar_conexion()

@@ -2,7 +2,7 @@ import datetime as dt
 from datetime import date
 
 import tkinter as tk
-from tkinter import simpledialog
+from tkinter import simpledialog, messagebox
 
 FECHA_MIN = dt.date(2020, 1, 1)
 
@@ -213,12 +213,14 @@ class VentanaTags(simpledialog.Dialog):
         self.result = ",".join(seleccionados) if seleccionados else ""
 
 
-def generar_json():
+def generar_json(ruta):
     from pathlib import Path
     import persistencia as bd
     import json
 
-    data_file = Path("data_passistant.json")
+    if not ruta:
+        return False
+    data_file = Path(ruta)
     persist = bd.Persistencia()
     info_tareas = persist.trae_tareas()
     info_eventos = persist.trae_eventos()
@@ -254,92 +256,184 @@ def generar_json():
     try:
         with open(data_file, "w", encoding="utf-8") as f:
             json.dump(info_gnral, f, ensure_ascii=False, indent=4)
-    except Exception as e:
+    except Exception:
         return False
+    # except Exception as e:
+    #     return False
     return True
 
 
-def generar_pdf():
+def generar_pdf(ruta):
     from pathlib import Path
     import persistencia as bd
     from fpdf import FPDF
 
-    pdf_file = Path("data_passistant.pdf")
+    if not ruta:
+        return False
+    pdf_file = Path(ruta)
     persist = bd.Persistencia()
-
     info_tareas = persist.trae_tareas()
     info_eventos = persist.trae_eventos()
     info_notas = persist.trae_notas()
 
-    # Crear PDF
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
+
+    def agregar_titulo(texto):
+        pdf.set_font("Arial", "B", 16)
+        pdf.cell(0, 12, texto, ln=True)
+        y = pdf.get_y()  # posición vertical actual
+        pdf.line(10, y, 200, y)  # x1, y1, x2, y2 (márgenes estándar)
+        pdf.ln(3)
+        pdf.set_font("Arial", size=10)
+
+    def agregar_item(labels, datos):
+        pdf.set_font("Arial", size=10)
+        for label, valor in zip(labels, datos):
+            if label.lower().startswith("descripción"):
+                pdf.multi_cell(0, 6, f"{label}: {valor}")
+            else:
+                pdf.cell(0, 6, f"{label}: {valor}", ln=True)
+        pdf.ln(4)
+
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
-
-    # ----- TAREAS -----
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(0, 10, "TAREAS", ln=True)
-    pdf.set_font("Arial", size=12)
-
+    agregar_titulo("TAREAS REGISTRADAS")
+    pdf.cell(0, 8, f"Total tareas: {len(info_tareas)}", ln=True)
+    pdf.ln(3)
     if info_tareas:
         for i in info_tareas:
-            pdf.multi_cell(
-                0,
-                8,
-                f"ID: {i[0]}\n"
-                f"Descripción: {i[1]}\n"
-                f"Fecha: {i[2]}\n"
-                f"Prioridad: {i[3]}\n"
-                f"Estado: {i[4]}\n"
-                f"Tags: {i[5]}\n"
-                "---------------------------",
+            agregar_item(
+                ["ID", "Descripción", "Fecha", "Prioridad", "Estado", "Tags"],
+                [i[0], i[1], i[2], i[3], i[4], i[5]],
             )
     else:
         pdf.cell(0, 10, "No hay tareas registradas.", ln=True)
-
-    # ----- EVENTOS -----
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(0, 10, "EVENTOS", ln=True)
-    pdf.set_font("Arial", size=12)
-
+    pdf.add_page()
+    agregar_titulo("EVENTOS REGISTRADOS")
+    pdf.cell(0, 8, f"Total eventos: {len(info_eventos)}", ln=True)
+    pdf.ln(3)
     if info_eventos:
         for i in info_eventos:
-            pdf.multi_cell(
-                0,
-                8,
-                f"ID: {i[0]}\n"
-                f"Descripción: {i[1]}\n"
-                f"Inicio: {i[2]}\n"
-                f"Fin: {i[3]}\n"
-                f"Tags: {i[4]}\n"
-                "---------------------------",
+            agregar_item(
+                ["ID", "Descripción", "Inicio", "Fin", "Tags"],
+                [i[0], i[1], i[2], i[3], i[4]],
             )
     else:
         pdf.cell(0, 10, "No hay eventos registrados.", ln=True)
-
-    # ----- NOTAS -----
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(0, 10, "NOTAS", ln=True)
-    pdf.set_font("Arial", size=12)
-
+    pdf.add_page()
+    agregar_titulo("NOTAS REGISTRADAS")
+    pdf.cell(0, 8, f"Total notas: {len(info_notas)}", ln=True)
+    pdf.ln(3)
     if info_notas:
         for i in info_notas:
-            pdf.multi_cell(
-                0,
-                8,
-                f"ID: {i[0]}\n"
-                f"Descripción: {i[1]}\n"
-                f"Fecha creación: {i[2]}\n"
-                f"Tags: {i[3]}\n"
-                "---------------------------",
+            agregar_item(
+                ["ID", "Descripción", "Fecha creación", "Tags"],
+                [i[0], i[1], i[2], i[3]],
             )
     else:
         pdf.cell(0, 10, "No hay notas registradas.", ln=True)
-
     try:
         pdf.output(pdf_file)
     except Exception:
         return False
-
     return True
+
+
+def borrar_info(parent=None, ejecutar_borrado=None):
+    created_root = None
+    # Si parent no es un widget tkinter válido, crear uno temporal
+    if parent is None or not hasattr(parent, "tk"):
+        created_root = tk.Tk()
+        created_root.withdraw()
+    try:
+        if not messagebox.askokcancel(
+            "Confirmación",
+            "¿Esta seguro de borrar toda la información registrada en la BD?",
+        ):
+            return False
+        # Usuario administrador
+        usuario = simpledialog.askstring(
+            "Verificación administrador",
+            "Usuario administrador:",
+            parent=parent,
+        )
+        if usuario is None:
+            return False
+
+        # Clave enmascarada
+        clave = simpledialog.askstring(
+            "Verificación administrador",
+            "Clave de administrador:",
+            show="*",
+            parent=parent,
+        )
+        if clave is None:
+            return False
+
+        if ejecutar_borrado is not None and callable(ejecutar_borrado):
+            try:
+                resultado = ejecutar_borrado(usuario, clave)
+            except Exception as e:
+                return False
+            if resultado:
+                return True
+            else:
+                return False
+        return (True, usuario, clave)
+    finally:
+        try:
+            created_root.destroy()
+        except Exception:
+            pass
+
+
+def actualizar_clave_adm(parent=None, ejecutar_actualizacion=None):
+    created_root = None
+    # Si parent no es un widget tkinter válido, crear uno temporal
+    if parent is None or not hasattr(parent, "tk"):
+        created_root = tk.Tk()
+        created_root.withdraw()
+    try:
+        # Usuario administrador
+        usuario = simpledialog.askstring(
+            "Verificación administrador",
+            "Usuario administrador:",
+            parent=parent,
+        )
+        if usuario is None:
+            return False
+        # Clave enmascarada
+        clave = simpledialog.askstring(
+            "Verificación administrador",
+            "Clave ACTUAL:",
+            show="*",
+            parent=parent,
+        )
+        if clave is None:
+            return False
+        nva_clave = simpledialog.askstring(
+            "Actualización clave",
+            "Clave NUEVA:",
+            show="*",
+            parent=parent,
+        )
+        if nva_clave is None:
+            messagebox.showwarning(
+                "Aviso", "La clave del administrador no puede estar vacía"
+            )
+            return False
+        if ejecutar_actualizacion is not None and callable(ejecutar_actualizacion):
+            try:
+                resultado = ejecutar_actualizacion(usuario, clave, nva_clave)
+            except Exception as e:
+                return False
+            if resultado:
+                return True
+            else:
+                return False
+        return (True, usuario, clave)
+    finally:
+        try:
+            created_root.destroy()
+        except Exception:
+            pass
