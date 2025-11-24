@@ -11,16 +11,18 @@ class HandlerUI:
         self.root.title("Mini-Asistente Personal - P.F. Python 2025 (Franco Calderón)")
         self.bd = persist.Persistencia()
 
-        # --- Menú ---
+        # Menú
         menu_bar = tk.Menu(root)
         user_menu = tk.Menu(menu_bar, tearoff=0)
-        user_menu.add_command(label="Exportar a PDF", command=self.exportar_pdf)
-        user_menu.add_command(label="Exportar JSON", command=self.exportar_json)
-        user_menu.add_command(label="Generar Gráficos", command=self.generar_graficos)
-        user_menu.add_separator()
-        user_menu.add_command(label="Cambiar contraseña", command=self.cambiar_clave)
+        user_menu.add_command(label="Exportar a PDF", command=self.exportar_pdf_user)
+        user_menu.add_command(label="Exportar JSON", command=self.exportar_json_user)
+        user_menu.add_command(
+            label="Generar Gráficos", command=self.generar_graficos_user
+        )
+        ##user_menu.add_separator()
         adm_menu = tk.Menu(menu_bar, tearoff=0)
-        adm_menu.add_command(label="Borrar BD", command=self.borrar_bd)
+        adm_menu.add_command(label="Borrar BD", command=self.borrar_bd_adm)
+        adm_menu.add_command(label="Cambiar contraseña", command=self.cambiar_clave_adm)
 
         menu_bar.add_cascade(label="Usuario", menu=user_menu)
         menu_bar.add_cascade(label="Administrador", menu=adm_menu)
@@ -256,19 +258,31 @@ class HandlerUI:
             # Estableciendo colores por prioridad
             self.id_map_n[i + offset] = _id  # guardamos el ID
 
-    def exportar_pdf(self):
+    def exportar_pdf_user(self):
+        if util.generar_pdf():
+            msj.showinfo("Confirmación", "El archivo .PDF fue generado correctamente")
+        else:
+            msj.showwarning(
+                "Aviso",
+                "El archivo .PDF no pudo ser generado. Contacte con el Administrador del sistema",
+            )
+
+    def exportar_json_user(self):
+        if util.generar_json():
+            msj.showinfo("Confirmación", "El archivo .JSON fue generado correctamente")
+        else:
+            msj.showwarning(
+                "Aviso",
+                "El archivo .JSON no pudo ser generado. Contacte con el Administrador del sistema",
+            )
+
+    def generar_graficos_user(self):
         pass
 
-    def exportar_json(self):
+    def cambiar_clave_adm(self):
         pass
 
-    def generar_graficos(self):
-        pass
-
-    def cambiar_clave(self):
-        pass
-
-    def borrar_bd(self):
+    def borrar_bd_adm(self):
         pass
 
     def on_closing(self):

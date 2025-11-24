@@ -211,3 +211,135 @@ class VentanaTags(simpledialog.Dialog):
         # Guardar solo los tags marcados como cadena separada por comas
         seleccionados = [tag for tag, var in self.vars if var.get() == 1]
         self.result = ",".join(seleccionados) if seleccionados else ""
+
+
+def generar_json():
+    from pathlib import Path
+    import persistencia as bd
+    import json
+
+    data_file = Path("data_passistant.json")
+    persist = bd.Persistencia()
+    info_tareas = persist.trae_tareas()
+    info_eventos = persist.trae_eventos()
+    info_notas = persist.trae_notas()
+
+    info_gnral = {
+        "tareas": [],
+        "eventos": [],
+        "notas": [],
+    }
+    for i in info_tareas:
+        fila = {
+            "id": i[0],
+            "tarea_descrip": i[1],
+            "fecha": i[2],
+            "prioridad": i[3],
+            "estado": i[4],
+            "tags": i[5],
+        }
+        info_gnral["tareas"].append(fila)
+    for i in info_eventos:
+        fila = {
+            "id": i[0],
+            "evento_descrip": i[1],
+            "fecha_inicio": i[2],
+            "fecha_fin": i[3],
+            "tags": i[4],
+        }
+        info_gnral["eventos"].append(fila)
+    for i in info_notas:
+        fila = {"id": i[0], "nota_descrip": i[1], "fecha_creacion": i[2], "tags": i[3]}
+        info_gnral["notas"].append(fila)
+    try:
+        with open(data_file, "w", encoding="utf-8") as f:
+            json.dump(info_gnral, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        return False
+    return True
+
+
+def generar_pdf():
+    from pathlib import Path
+    import persistencia as bd
+    from fpdf import FPDF
+
+    pdf_file = Path("data_passistant.pdf")
+    persist = bd.Persistencia()
+
+    info_tareas = persist.trae_tareas()
+    info_eventos = persist.trae_eventos()
+    info_notas = persist.trae_notas()
+
+    # Crear PDF
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+    # ----- TAREAS -----
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, "TAREAS", ln=True)
+    pdf.set_font("Arial", size=12)
+
+    if info_tareas:
+        for i in info_tareas:
+            pdf.multi_cell(
+                0,
+                8,
+                f"ID: {i[0]}\n"
+                f"Descripción: {i[1]}\n"
+                f"Fecha: {i[2]}\n"
+                f"Prioridad: {i[3]}\n"
+                f"Estado: {i[4]}\n"
+                f"Tags: {i[5]}\n"
+                "---------------------------",
+            )
+    else:
+        pdf.cell(0, 10, "No hay tareas registradas.", ln=True)
+
+    # ----- EVENTOS -----
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, "EVENTOS", ln=True)
+    pdf.set_font("Arial", size=12)
+
+    if info_eventos:
+        for i in info_eventos:
+            pdf.multi_cell(
+                0,
+                8,
+                f"ID: {i[0]}\n"
+                f"Descripción: {i[1]}\n"
+                f"Inicio: {i[2]}\n"
+                f"Fin: {i[3]}\n"
+                f"Tags: {i[4]}\n"
+                "---------------------------",
+            )
+    else:
+        pdf.cell(0, 10, "No hay eventos registrados.", ln=True)
+
+    # ----- NOTAS -----
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, "NOTAS", ln=True)
+    pdf.set_font("Arial", size=12)
+
+    if info_notas:
+        for i in info_notas:
+            pdf.multi_cell(
+                0,
+                8,
+                f"ID: {i[0]}\n"
+                f"Descripción: {i[1]}\n"
+                f"Fecha creación: {i[2]}\n"
+                f"Tags: {i[3]}\n"
+                "---------------------------",
+            )
+    else:
+        pdf.cell(0, 10, "No hay notas registradas.", ln=True)
+
+    try:
+        pdf.output(pdf_file)
+    except Exception:
+        return False
+
+    return True

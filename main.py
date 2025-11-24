@@ -1,5 +1,5 @@
 import tkinter as tk
-import handler_ui as ui
+import main_ui as ui
 from controller_tareas import ControllerTareas
 from controller_eventos import ControllerEventos
 from controller_notas import ControllerNotas
