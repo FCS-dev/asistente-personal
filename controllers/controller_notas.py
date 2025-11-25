@@ -1,5 +1,15 @@
-import notas_ui as note
+import views.notas_ui as note
 from tkinter import messagebox as msj
+
+"""
+'Notas'
+Clase encargada de gestionar los user_events corespondientes.
+Métodos:
+traer_notas() -> Trae las 'notas' de la BD
+nueva_nota() -> Controla el flujo para el registro de nuevas 'notas'
+eliminar_nota() -> Controla el flujo para la eliminación de 'notas'
+editar_nota() -> Controla el flujo para la edición de 'notas'
+"""
 
 
 class ControllerNotas:
@@ -24,7 +34,7 @@ class ControllerNotas:
             if selection[0] not in self.ui.id_map_n:
                 msj.showerror("Error", "No seleccionaste una nota válida")
                 return  # fila de título u otra no válida
-            id_real = self.ui.id_map_n.get(selection[0])  # recuperamos el ID interno
+            id_real = self.ui.id_map_n.get(selection[0])  # ID interno
         except IndexError:
             msj.showerror("Error", "No seleccionaste una nota válida")
             return

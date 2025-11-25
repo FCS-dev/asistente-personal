@@ -1,8 +1,13 @@
 import tkinter as tk
 from tkinter import simpledialog
 from tkinter import messagebox as msj
-import persistencia as bd
-import utiles as util
+import repository.persistencia as bd
+import utils.utiles as util
+
+"""
+Clase VentanaNOta()
+UI principal de la actividad 'Notas'
+"""
 
 
 class VentanaNota(simpledialog.Dialog):

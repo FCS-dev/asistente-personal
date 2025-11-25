@@ -2,8 +2,17 @@ import tkinter as tk
 from tkinter import messagebox as msj
 from tkinter import filedialog
 
-import persistencia as persist
-import utiles as util
+import repository.persistencia as persist
+import utils.utiles as util
+import views.dialog_windows as dialogs
+
+"""
+Clase HandlerUI()
+Gestión general de la UI de la app (pantalla principal)
+declaración de eventos (doble click o selección -focus-)
+solicitud y visualizacion de frames para 'Tareas', 'Eventos' y 'Notas'
+Flujo de comandos para las opciones del menú
+"""
 
 
 class HandlerUI:
@@ -20,7 +29,6 @@ class HandlerUI:
         user_menu.add_command(
             label="Generar Gráficos", command=self.generar_graficos_user
         )
-        ##user_menu.add_separator()
         adm_menu = tk.Menu(menu_bar, tearoff=0)
         adm_menu.add_command(label="Borrar info BD", command=self.borrar_info_bd_adm)
         adm_menu.add_command(label="Cambiar contraseña", command=self.cambiar_clave_adm)
@@ -62,7 +70,6 @@ class HandlerUI:
         botones_frame_nota = tk.Frame(nota_frame)
         botones_frame_nota.grid(row=0, column=1, sticky="ns", padx=5, pady=5)
 
-        ####
         # buttons
         btn_nuevo_tarea = tk.Button(
             botones_frame_tarea,
@@ -153,7 +160,7 @@ class HandlerUI:
             if index not in self.id_map_e:
                 msj.showerror("Error", "No seleccionaste un evento válido")
                 return  # fila de título u otra no válida
-            id_real = self.id_map_e.get(index)  # recuperamos el ID interno
+            id_real = self.id_map_e.get(index)  # ID interno
         except IndexError:
             msj.showerror("Error", "No seleccionaste una evento válido")
             return
@@ -166,7 +173,7 @@ class HandlerUI:
             if index not in self.id_map_n:
                 msj.showerror("Error", "No seleccionaste una nota válida")
                 return  # fila de título u otra no válida
-            id_real = self.id_map_n.get(index)  # recuperamos el ID interno
+            id_real = self.id_map_n.get(index)  # ID interno
         except IndexError:
             msj.showerror("Error", "No seleccionaste una nota válida")
             return
@@ -288,7 +295,8 @@ class HandlerUI:
             )
 
     def generar_graficos_user(self):
-        pass
+        """Abre la ventana de gráficos estadísticos."""
+        ventana_graficos = dialogs.CuadrosEstadisticos(self.root, bd=self.bd)
 
     def cambiar_clave_adm(self):
         if util.actualizar_clave_adm(self.root, self.bd.cambiar_clave):

@@ -1,0 +1,111 @@
+{
+    "tareas": [
+        {
+            "id": 3,
+            "tarea_descrip": "limpiar la casa (y el baño)",
+            "fecha": "2025-11-30",
+            "prioridad": "Normal",
+            "estado": "Pendiente",
+            "tags": "Hogar"
+        },
+        {
+            "id": 9,
+            "tarea_descrip": "Actualizar CV (certs?)",
+            "fecha": "2025-11-26",
+            "prioridad": "Alta",
+            "estado": "Pendiente",
+            "tags": "Personal,Trabajo"
+        },
+        {
+            "id": 1,
+            "tarea_descrip": "Terminar proyecto Python3",
+            "fecha": "2025-11-24",
+            "prioridad": "Alta",
+            "estado": "En progreso",
+            "tags": "Estudios"
+        },
+        {
+            "id": 4,
+            "tarea_descrip": "cita médico",
+            "fecha": "2025-11-24",
+            "prioridad": "Alta",
+            "estado": "Pendiente",
+            "tags": "Salud"
+        },
+        {
+            "id": 5,
+            "tarea_descrip": "preparar documentacion",
+            "fecha": "2025-11-24",
+            "prioridad": "Normal",
+            "estado": "Pendiente",
+            "tags": "Estudios"
+        },
+        {
+            "id": 8,
+            "tarea_descrip": "Buscar zapatos para Ramoncio (baratos)",
+            "fecha": "2025-11-24",
+            "prioridad": "Alta",
+            "estado": "Completada",
+            "tags": "Personal,Hogar"
+        },
+        {
+            "id": 2,
+            "tarea_descrip": "recoger pedido Springfield",
+            "fecha": "2025-11-22",
+            "prioridad": "Alta",
+            "estado": "Completada",
+            "tags": ""
+        }
+    ],
+    "eventos": [
+        {
+            "id": 16,
+            "evento_descrip": "Concierto GnR",
+            "fecha_inicio": "2026-01-05",
+            "fecha_fin": "2026-01-05",
+            "tags": "Recordatorio"
+        },
+        {
+            "id": 10,
+            "evento_descrip": "Inicio de la temporada Navideña",
+            "fecha_inicio": "2025-11-20",
+            "fecha_fin": "2026-01-01",
+            "tags": ""
+        },
+        {
+            "id": 14,
+            "evento_descrip": "Santo del chinito",
+            "fecha_inicio": "2025-11-30",
+            "fecha_fin": "2025-11-30",
+            "tags": "Cumpleaños,Recordatorio"
+        },
+        {
+            "id": 11,
+            "evento_descrip": "Fin de clases (Python)",
+            "fecha_inicio": "2025-11-25",
+            "fecha_fin": "2025-11-25",
+            "tags": "Reunión"
+        },
+        {
+            "id": 17,
+            "evento_descrip": "Oktoberfest",
+            "fecha_inicio": "2025-10-01",
+            "fecha_fin": "2025-10-15",
+            "tags": "Viaje"
+        }
+    ],
+    "notas": [
+        {
+            "id": 1,
+            "nota_descrip": "Este es un mensaje aleatorio para saber la capacidad del textbox de las notas. Será que ya llegue al máximo? No Aún no llegué!!!! Aqui vamos de nuevo...",
+            "fecha_creacion": "2025-11-23",
+            "tags": "Idea"
+        },
+        {
+            "id": 4,
+            "nota_descrip": "Lorem ipsum dolor sit amet consectetur adipiscing elit pharetra, orci cras ultricies dapibus nibh sociis neque, venenatis euismod sodales feugiat montes quis nullam. At donec ullamcorper blandit nunc ad gravida, nam viverra posuere aenean mattis hac mi, felis dictumst ornare habitant aliquam. Parturient curae velit molestie rhoncus varius massa sagittis pulvinar facilisis, vitae non vel senectus etiam lacinia auctor risus. Netus volutpat sociosqu sed laoreet vestibulum fermentum morbi aptent tempor, cum cursus torquent scelerisque congue accumsan erat. Vivamus proin per hendrerit suscipit fames turpis commodo justo, id sapien faucibus dignissim platea vulputate convallis, est integer eleifend habitasse duis iaculis interdum.",
+            "fecha_creacion": "2025-11-23",
+            "tags": "Apunte"
+        }
+    ]
+}

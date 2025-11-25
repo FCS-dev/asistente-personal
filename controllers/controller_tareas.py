@@ -1,6 +1,17 @@
-import tareas_ui as task
+import views.tareas_ui as task
 from tkinter import messagebox as msj
-import utiles as util
+import utils.utiles as util
+
+"""
+'Tareas'
+Clase encargada de gestionar los user_events corespondientes.
+Métodos:
+traer_tareas() -> Trae las 'tareas' de la BD
+nueva_tarea() -> Controla el flujo para el registro de nuevas 'tareas'
+cambiar_estado_tarea() -> Controla el flujo para modificar el estado de las 'tareas'
+eliminar_tarea() -> Controla el flujo para la eliminación de 'tareas'
+editar_tarea() -> Controla el flujo para la edición de 'tareas'
+"""
 
 
 class ControllerTareas:
@@ -27,7 +38,7 @@ class ControllerTareas:
             if selection[0] not in self.ui.id_map_t:
                 msj.showerror("Error", "No seleccionaste una tarea válida")
                 return  # fila de título u otra no válida
-            id_real = self.ui.id_map_t.get(selection[0])  # recuperamos el ID interno
+            id_real = self.ui.id_map_t.get(selection[0])  # ID interno
         except IndexError:
             msj.showerror("Error", "No seleccionaste una tarea válida")
             return
@@ -60,7 +71,7 @@ class ControllerTareas:
             if selection[0] not in self.ui.id_map_t:
                 msj.showerror("Error", "No seleccionaste una tarea válida")
                 return  # fila de título u otra no válida
-            id_real = self.ui.id_map_t.get(selection[0])  # recuperamos el ID interno
+            id_real = self.ui.id_map_t.get(selection[0])  # ID interno
         except IndexError:
             msj.showerror("Error", "No seleccionaste una tarea válida")
             return

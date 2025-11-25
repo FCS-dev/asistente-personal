@@ -2,11 +2,46 @@ import os
 import bcrypt
 import sqlite3
 
+"""
+Clase Persistencia()
+Contiene todos los métodos necesarios para interactuar con la BD.
+Métodos:
+crear_tablas() -> Si no existe la BD, la crea y también la estructura de las tablas requeridas
+*TAREAS*
+traer_tareas()
+trae_una_tarea()
+guarda_nueva_tarea()
+guardar_tarea()
+cambiar_estado_tarea()
+eliminar_tarea()
+*NOTAS*
+traer_notas()
+trae_una_nota()
+guardar_nueva_nota()
+guardar_nota()
+eliminar_nota()
+*EVENTOS*
+traer_eventos()
+trae_un_evento()
+guardar_nuevo_evento()
+guardar_evento()
+eliminar_evento()
+*(Otros métodos requeridos por la app)*
+todos_los_tags()
+eliminar_data()
+cambiar_clave()
+obtener_tags()
+obtener_cantidad_por_dia()
+cerrar_conexion()
+"""
+
 
 class Persistencia:
     def __init__(self):
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-        DB = os.path.join(BASE_DIR, "passistant.db")
+        DATA_DIR = os.path.join(BASE_DIR, "..", "data")
+        DATA_DIR = os.path.abspath(DATA_DIR)  # normaliza ruta
+        DB = os.path.join(DATA_DIR, "passistant.db")
         self.conn = sqlite3.connect(DB)
         self.cursor = self.conn.cursor()
 
@@ -236,6 +271,7 @@ class Persistencia:
         self.cursor.execute("SELECT tag_descrip FROM tags WHERE tipo=?", (tipo,))
         return self.cursor.fetchall()
 
+    # Eliminar info de la BD. Primero valida si tiene el permiso (usuario 'Adminsitrador')
     def eliminar_data(self, adm, clave):
         self.cursor.execute(
             "SELECT * FROM usuarios WHERE usuario=? AND tipo='ADMIN'",
@@ -256,6 +292,7 @@ class Persistencia:
             return False
         return True
 
+    # Cambiar del clave al usuario 'Administrador'
     def cambiar_clave(self, adm, clave, nva_clave):
         self.cursor.execute(
             "SELECT * FROM usuarios WHERE usuario=? AND tipo='ADMIN'",
@@ -267,9 +304,6 @@ class Persistencia:
         id_user = linea_adm[0]
         password = linea_adm[2]
         if not bcrypt.checkpw(clave.encode("utf-8"), password):
-            # print(f"Administrador: {adm}")
-            # print(f"Clave ANTERIOR: {clave}")
-            # print(f"Clave NUEVA: {nva_clave}")
             return False
         try:
             hashed = bcrypt.hashpw(nva_clave.encode(), bcrypt.gensalt())
@@ -282,6 +316,52 @@ class Persistencia:
             return False
         return True
 
-    # Cerrando la conexion
+    # Query para estadísticas de gráficos
+    def obtener_tags(self):
+        """
+        Retorna un dict con la incidencia de cada tag.
+        {tag: cantidad, ...}
+        """
+        self.cursor.execute("""
+                            SELECT tags FROM tareas WHERE tags IS NOT NULL 
+                            UNION ALL
+                            SELECT tags FROM eventos WHERE tags IS NOT NULL 
+                            UNION ALL
+                            SELECT tags FROM notas WHERE tags IS NOT NULL 
+                            """)
+        filas = self.cursor.fetchall()
+        tags_count = {}
+        for fila in filas:
+            if fila[0]:  # si tags no es vacío
+                tags_list = [t.strip() for t in fila[0].split(",")]
+                for tag in tags_list:
+                    tags_count[tag] = tags_count.get(tag, 0) + 1
+        return tags_count
+
+    # Query para estadísticas de gráficos
+    def obtener_cantidad_por_dia(self):
+        """
+        Retorna items por día.
+        Devuelve lista: [(fecha, cantidad), ...]
+        """
+
+        self.cursor.execute(
+            """
+            SELECT fecha, SUM(cnt) AS cnt_total FROM (
+                SELECT fecha_inicio AS fecha, COUNT(*) AS cnt
+                    FROM eventos GROUP BY fecha_inicio
+                UNION ALL
+                SELECT fecha_creacion AS fecha, COUNT(*) AS cnt
+                    FROM notas GROUP BY fecha_creacion
+                UNION ALL
+                SELECT fecha AS fecha, COUNT(*) AS cnt
+                    FROM tareas GROUP BY fecha)
+            GROUP BY fecha ORDER BY fecha ASC
+            """
+        )
+        resumen = self.cursor.fetchall()
+        return list(resumen)
+
+    # Cierre de la conexión
     def cerrar_conexion(self):
         self.conn.close()

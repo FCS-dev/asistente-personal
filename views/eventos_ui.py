@@ -1,8 +1,13 @@
 import tkinter as tk
 from tkinter import simpledialog
 from tkinter import messagebox as msj
-import utiles as util
-import persistencia as bd
+import utils.utiles as util
+import repository.persistencia as bd
+
+"""
+Clase VentanaEvento()
+UI principal de la actividad 'Evento'
+"""
 
 
 class VentanaEvento(simpledialog.Dialog):

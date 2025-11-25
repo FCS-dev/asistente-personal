@@ -128,11 +128,13 @@ SQLite crea un archivo `agenda.db` con la tabla `contactos`:
 ## Mejoras Visibles (Propuestas)
 
 * Añadir **mantenimiento de tags (etiquetas)** vía menú "Administrador".
-* Generar mas gráficos estadisticos, cuando la la muestra de información sea mayor.
-* Incluir campos que podrían ser importantes (hora, imágenes).
-* Mejorar el PDF con  **cabecera, tabla y estilos**.
+* Generar mayor cantidad del gráficos estadisticos; además es necesario más data de prueba.
+* Incluir otros campos que podrían ser importantes (hora, imágenes).
+* Mejorar el PDF con  **graficos**.
 * Exportar a **Excel (xlsx)**.
-* Buscar mejor integración con la I.A. para facilitar aún más el uso de la app al usuario.
+* Buscar integración con la I.A. para facilitar aún más el uso de la app.
+* Usar archivo .env para variables de entorno, tales como la clave de administrador o el nombre de la BD a generar/usar.
+
 ---
 
 ## 📄 Licencia

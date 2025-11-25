@@ -1,6 +1,16 @@
-import eventos_ui as event
+import views.eventos_ui as event
 from tkinter import messagebox as msj
-import utiles as util
+import utils.utiles as util
+
+"""
+'Eventos'
+Clase encargada de gestionar los user_events corespondientes.
+Métodos:
+traer_eventos() -> Trae los 'eventos' de la BD
+nuevo_evento() -> Controla el flujo para el registro de nuevos 'eventos'
+eliminar_evento() -> Controla el flujo para la eliminación de 'eventos'
+editar_evento() -> Controla el flujo para la edición de 'eventos'
+"""
 
 
 class ControllerEventos:
@@ -27,7 +37,7 @@ class ControllerEventos:
             if selection[0] not in self.ui.id_map_e:
                 msj.showerror("Error", "No seleccionaste un evento válido")
                 return  # fila de título u otra no válida
-            id_real = self.ui.id_map_e.get(selection[0])  # recuperamos el ID interno
+            id_real = self.ui.id_map_e.get(selection[0])  # ID interno
         except IndexError:
             msj.showerror("Error", "No seleccionaste un evento válido")
             return
